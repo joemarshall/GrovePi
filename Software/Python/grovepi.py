@@ -158,6 +158,7 @@ encoder_dis_cmd=[17]
 flow_read_cmd=[12]
 flow_disable_cmd=[13]
 flow_en_cmd=[18]
+pulse_read_cmd=[23]
 # This allows us to be more specific about which commands contain unused bytes
 unused = 0
 retries = 10
@@ -574,3 +575,13 @@ def flowRead():
 		return [data_back[0],data_back[2]*256+data_back[1]]
 	else:
 		return [-1,-1]
+        
+# get heartbeat and check if a beat has happened from the pulse sensor amped
+# returns [beathappened (true or false),current BPM] bpm zero = no pulse detected
+def heartRead(pin):
+    write_i2c_block(address,pulse_read_cmd+[pin,unused,unused])
+    data_back=bus.read_i2c_block_data(address,1)[0:3]
+    if data_back[0]!=255:
+      return [data_back[1]==1,data_back[3]*256+data_back[2]]
+    else:
+      return [-1,-1]
